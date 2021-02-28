@@ -24,7 +24,7 @@ readily with other Python GIS packages such as pyproj_, Rtree_, and Shapely_.
 
 Fiona is supported only on CPython versions 3.6+.
 
-Why the name "Fiona"? Because Fiona is OGR's neat and nimble API for Python programmers.
+Why the name "Fiona"? Because Fiona is OGR's neat and nimble API for Python programmers. And a Shrek reference made us laugh.
 
 For more details, see:
 
@@ -103,7 +103,7 @@ provides an index ordered list of layer names.
             print(layername, len(src))
 
     # Output:
-    # (u'coutwildrnp', 67)
+    # ('coutwildrnp', 67)
 
 Layer can also be specified by index. In this case, ``layer=0`` and
 ``layer='test_uk'`` specify the same layer in the data file or directory.
@@ -115,7 +115,7 @@ Layer can also be specified by index. In this case, ``layer=0`` and
             print(i, layername, len(src))
 
     # Output:
-    # (0, u'coutwildrnp', 67)
+    # (0, 'coutwildrnp', 67)
 
 Writing Multilayer data
 -----------------------
@@ -141,10 +141,10 @@ writing.
         print(f['properties'])
 
         # Output:
-        # [u'bar']
+        # ['bar']
         # 1
         # Polygon
-        # OrderedDict([(u'PERIMETER', 1.22107), (u'FEATURE2', None), (u'NAME', u'Mount Naomi Wilderness'), (u'FEATURE1', u'Wilderness'), (u'URL', u'http://www.wilderness.net/index.cfm?fuse=NWPS&sec=wildView&wname=Mount%20Naomi'), (u'AGBUR', u'FS'), (u'AREA', 0.0179264), (u'STATE_FIPS', u'49'), (u'WILDRNP020', 332), (u'STATE', u'UT')])
+        # OrderedDict([('PERIMETER', 1.22107), ('FEATURE2', None), ('NAME', 'Mount Naomi Wilderness'), ('FEATURE1', 'Wilderness'), ('URL', 'http://www.wilderness.net/index.cfm?fuse=NWPS&sec=wildView&wname=Mount%20Naomi'), ('AGBUR', 'FS'), ('AREA', 0.0179264), ('STATE_FIPS', '49'), ('WILDRNP020', 332), ('STATE', 'UT')])
 
 A view of the /tmp/foo directory will confirm the creation of the new files.
 
@@ -168,7 +168,7 @@ and write zipped Shapefiles.
             print(i, layername, len(src))
 
     # Output:
-    # (0, u'coutwildrnp', 67)
+    # (0, 'coutwildrnp', 67)
 
 Fiona can also read from more exotic file systems. For instance, a
 zipped shape file in S3 can be accessed like so:
@@ -299,6 +299,11 @@ the ``GDAL_VERSION`` environment variable (e.g. ``set GDAL_VERSION=2.1``).
 .. code-block:: console
 
     $ python setup.py build_ext -I<path to gdal include files> -lgdal_i -L<path to gdal library> install --gdalversion 2.1
+    
+.. code-block:: console
+   
+   $ set GDAL_VERSION=3.0
+   $ pip install --install-option=build_ext --install-option="-I<drive letter>:\\<path to gdal include files>\\include" --install-option="-lgdal_i" --install-option="-L<drive letter>:\\<path to gdal lib files>\\libs" fiona
 
 Note: The GDAL DLL (``gdal111.dll`` or similar) and gdal-data directory need to
 be in your Windows PATH otherwise Fiona will fail to work.

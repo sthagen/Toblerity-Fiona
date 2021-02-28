@@ -9,7 +9,9 @@ import pytest
 import fiona
 from fiona.collection import Collection, supported_drivers
 from fiona.env import getenv
-from fiona.errors import FionaValueError, DriverError, FionaDeprecationWarning
+from fiona.errors import (
+    AttributeFilterError, FionaValueError, DriverError, FionaDeprecationWarning
+)
 
 from .conftest import WGS84PATTERN
 
@@ -347,13 +349,36 @@ class TestFilterReading(object):
         results = list(self.c.filter(mask=mask))
         assert len(results) == 26
 
+    def test_filter_where(self):
+        results = list(self.c.filter(where="NAME LIKE 'Mount%'"))
+        assert len(results) == 9
+        assert all([x['properties']['NAME'].startswith('Mount')
+                    for x in results])
+        results = list(self.c.filter(where="NAME LIKE '%foo%'"))
+        assert len(results) == 0
+        results = list(self.c.filter())
+        assert len(results) == 67
+
+    def test_filter_bbox_where(self):
+        # combined filter criteria
+        results = set(self.c.keys(
+            bbox=(-120.0, 40.0, -100.0, 50.0), where="NAME LIKE 'Mount%'"))
+        assert results == set([0, 2, 5, 13])
+        results = set(self.c.keys())
+        assert len(results) == 67
+
+    def test_filter_where_error(self):
+        for w in ["bad stuff", "NAME=3", "NNAME LIKE 'Mount%'"]:
+            with pytest.raises(AttributeFilterError):
+                self.c.filter(where=w)
+
 
 class TestUnsupportedDriver(object):
 
     def test_immediate_fail_driver(self, tmpdir):
         schema = {
             'geometry': 'Point',
-            'properties': {'label': 'str', u'verit\xe9': 'int'}}
+            'properties': {'label': 'str', 'verit\xe9': 'int'}}
         with pytest.raises(DriverError):
             fiona.open(str(tmpdir.join("foo")), "w", "Bogus", schema=schema)
 
@@ -364,7 +389,7 @@ class TestGenericWritingTest(object):
     def no_iter_shp(self, tmpdir):
         schema = {
             'geometry': 'Point',
-            'properties': [('label', 'str'), (u'verit\xe9', 'int')]}
+            'properties': [('label', 'str'), ('verit\xe9', 'int')]}
         self.c = fiona.open(str(tmpdir.join("test-no-iter.shp")),
                             'w', driver="ESRI Shapefile", schema=schema,
                             encoding='Windows-1252')
@@ -858,16 +883,28 @@ def test_open_kwargs(tmpdir, path_coutwildrnp_shp):
 
 @pytest.mark.network
 def test_collection_http():
-    ds = fiona.Collection('http://raw.githubusercontent.com/OSGeo/gdal/master/autotest/ogr/data/poly.shp', vsi='http')
-    assert ds.path == '/vsicurl/http://raw.githubusercontent.com/OSGeo/gdal/master/autotest/ogr/data/poly.shp'
-    assert len(ds) == 10
+    ds = fiona.Collection(
+        "https://raw.githubusercontent.com/Toblerity/Fiona/master/tests/data/coutwildrnp.shp",
+        vsi="https",
+    )
+    assert (
+        ds.path
+        == "/vsicurl/https://raw.githubusercontent.com/Toblerity/Fiona/master/tests/data/coutwildrnp.shp"
+    )
+    assert len(ds) == 67
 
 
 @pytest.mark.network
 def test_collection_zip_http():
-    ds = fiona.Collection('http://raw.githubusercontent.com/OSGeo/gdal/master/autotest/ogr/data/poly.zip', vsi='zip+http')
-    assert ds.path == '/vsizip/vsicurl/http://raw.githubusercontent.com/OSGeo/gdal/master/autotest/ogr/data/poly.zip'
-    assert len(ds) == 10
+    ds = fiona.Collection(
+        "https://raw.githubusercontent.com/Toblerity/Fiona/master/tests/data/coutwildrnp.zip",
+        vsi="zip+https",
+    )
+    assert (
+        ds.path
+        == "/vsizip/vsicurl/https://raw.githubusercontent.com/Toblerity/Fiona/master/tests/data/coutwildrnp.zip",
+    )
+    assert len(ds) == 67
 
 
 def test_encoding_option_warning(tmpdir, caplog):

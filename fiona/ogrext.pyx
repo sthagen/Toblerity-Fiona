@@ -20,16 +20,17 @@ from fiona._geometry cimport (
     GeomBuilder, OGRGeomBuilder, geometry_type_code,
     normalize_geometry_type_code, base_geometry_type_code)
 from fiona._err cimport exc_wrap_int, exc_wrap_pointer, exc_wrap_vsilfile
-
 import fiona
 from fiona._env import GDALVersion, get_gdal_version_num
-from fiona._err import cpl_errs, FionaNullPointerError, CPLE_BaseError, CPLE_OpenFailedError
+from fiona._err import (
+    cpl_errs, FionaNullPointerError, CPLE_BaseError, CPLE_AppDefinedError,
+    CPLE_OpenFailedError)
 from fiona._geometry import GEOMETRY_TYPES
 from fiona import compat
 from fiona.errors import (
     DriverError, DriverIOError, SchemaError, CRSError, FionaValueError,
     TransactionError, GeometryTypeValidationError, DatasetDeleteError,
-    FionaDeprecationWarning)
+    AttributeFilterError, FionaDeprecationWarning)
 from fiona.compat import strencode
 from fiona.rfc3339 import parse_date, parse_datetime, parse_time
 from fiona.rfc3339 import FionaDateType, FionaDateTimeType, FionaTimeType
@@ -893,7 +894,7 @@ cdef class WritingSession(Session):
                 OGRReleaseDataSource(self.cogr_ds)
                 self.cogr_ds = NULL
                 self.cogr_layer = NULL
-                raise DriverError(u"{}".format(exc))
+                raise DriverError(str(exc))
 
             else:
                 self._fileencoding = userencoding or self._get_fallback_encoding()
@@ -957,7 +958,7 @@ cdef class WritingSession(Session):
                 OGRReleaseDataSource(self.cogr_ds)
                 self.cogr_ds = NULL
                 self.cogr_layer = NULL
-                raise CRSError(u"{}".format(exc))
+                raise CRSError(str(exc))
 
             # Determine which encoding to use. The encoding parameter given to
             # the collection constructor takes highest precedence, then
@@ -1035,7 +1036,7 @@ cdef class WritingSession(Session):
             except Exception as exc:
                 OGRReleaseDataSource(self.cogr_ds)
                 self.cogr_ds = NULL
-                raise DriverIOError(u"{}".format(exc))
+                raise DriverIOError(str(exc))
 
             finally:
                 if options != NULL:
@@ -1108,7 +1109,7 @@ cdef class WritingSession(Session):
                     OGRReleaseDataSource(self.cogr_ds)
                     self.cogr_ds = NULL
                     self.cogr_layer = NULL
-                    raise SchemaError(u"{}".format(exc))
+                    raise SchemaError(str(exc))
 
                 else:
                     OGR_Fld_Destroy(cogr_fielddefn)
@@ -1212,7 +1213,7 @@ cdef class Iterator:
     cdef stepsign
 
     def __cinit__(self, collection, start=None, stop=None, step=None,
-                  bbox=None, mask=None):
+                  bbox=None, mask=None, where=None):
         if collection.session is None:
             raise ValueError("I/O operation on closed collection")
         self.collection = collection
@@ -1237,6 +1238,18 @@ cdef class Iterator:
 
         else:
             OGR_L_SetSpatialFilter(cogr_layer, NULL)
+
+        if where:
+            where_b = where.encode('utf-8')
+            where_c = where_b
+            try:
+                exc_wrap_int(
+                    OGR_L_SetAttributeFilter(cogr_layer, <const char*>where_c))
+            except CPLE_AppDefinedError as e:
+                raise AttributeFilterError(e) from None
+
+        else:
+            OGR_L_SetAttributeFilter(cogr_layer, NULL)
 
         self.encoding = session._get_internal_encoding()
 
