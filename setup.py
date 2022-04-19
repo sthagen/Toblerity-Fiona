@@ -284,7 +284,7 @@ requirements = [
 extras_require = {
     'calc': ['shapely'],
     's3': ['boto3>=1.2.4'],
-    'test': ['pytest>=3', 'pytest-cov', 'boto3>=1.2.4', 'mock; python_version < "3.4"']
+    'test': ['pytest>=3', 'pytest-cov', 'boto3>=1.2.4', 'pytz']
 }
 
 extras_require['all'] = list(set(it.chain(*extras_require.values())))
@@ -295,8 +295,8 @@ setup_args = dict(
     metadata_version='1.2',
     name='Fiona',
     version=version,
-    requires_python='>=3.6',
-    requires_external='GDAL (>=1.8)',
+    python_requires='>=3.6',
+    requires_external='GDAL (>=2.4)',
     description="Fiona reads and writes spatial data files",
     license='BSD',
     keywords='gis vector feature data',
@@ -304,7 +304,7 @@ setup_args = dict(
     author_email='sean.gillies@gmail.com',
     maintainer='Sean Gillies',
     maintainer_email='sean.gillies@gmail.com',
-    url='http://github.com/Toblerity/Fiona',
+    url='https://github.com/Toblerity/Fiona',
     long_description=readme + "\n" + changes + "\n" + credits,
     package_dir={'': '.'},
     packages=['fiona', 'fiona.fio'],
@@ -340,6 +340,8 @@ setup_args = dict(
         'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7',
         'Programming Language :: Python :: 3.8',
+        'Programming Language :: Python :: 3.9',
+        'Programming Language :: Python :: 3.10',
         'Topic :: Scientific/Engineering :: GIS'])
 
 if os.environ.get('PACKAGE_DATA'):

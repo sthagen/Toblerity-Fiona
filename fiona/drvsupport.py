@@ -101,7 +101,7 @@ supported_drivers = dict([
     # multi-layer
     #   ("OpenAir", "r"),
     # PCI Geomatics Database File 	PCIDSK 	No 	No 	Yes, using internal PCIDSK SDK (from GDAL 1.7.0)
-    ("PCIDSK", "rw"),
+    ("PCIDSK", "raw"),
     # PDS 	PDS 	No 	Yes 	Yes
     ("PDS", "r"),
     # PDS renamed to OGR_PDS for GDAL 2.x
@@ -151,19 +151,19 @@ supported_drivers = dict([
 
 # Minimal gdal version for different modes
 driver_mode_mingdal = {
-
-    'r': {'GPKG': (1, 11, 0),
-          'GeoJSONSeq': (2, 4, 0),
-          'FlatGeobuf': (3, 1, 0)},
-
-    'w': {'GPKG': (1, 11, 0),
-          'PCIDSK': (2, 0, 0),
-          'GeoJSONSeq': (2, 4, 0),
-          'FlatGeobuf': (3, 1, 3)},
-
-    'a': {'GPKG': (1, 11, 0),
-          'GeoJSON': (2, 1, 0),
-          'MapInfo File': (2, 0, 0)}
+    "r": {"GPKG": (1, 11, 0), "GeoJSONSeq": (2, 4, 0), "FlatGeobuf": (3, 1, 0)},
+    "w": {
+        "GPKG": (1, 11, 0),
+        "PCIDSK": (2, 0, 0),
+        "GeoJSONSeq": (2, 4, 0),
+        "FlatGeobuf": (3, 1, 3),
+    },
+    "a": {
+        "GPKG": (1, 11, 0),
+        "PCIDSK": (2, 0, 0),
+        "GeoJSON": (2, 1, 0),
+        "MapInfo File": (2, 0, 0),
+    },
 }
 
 

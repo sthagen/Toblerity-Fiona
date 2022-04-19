@@ -14,78 +14,73 @@ jobs:
           # Test all supported gdal minor versions (except latest stable) with one python version
           - {
               python: 3.6,
-              GDALVERSION: "2.0.3",
-              PROJVERSION: "4.9.3",
-              allow_failure: "false",
-            }
-          - {
-              python: 3.6,
-              GDALVERSION: "2.1.4",
-              PROJVERSION: "4.9.3",
-              allow_failure: "false",
-            }
-          - {
-              python: 3.6,
-              GDALVERSION: "2.2.4",
-              PROJVERSION: "4.9.3",
-              allow_failure: "false",
-            }
-          - {
-              python: 3.6,
-              GDALVERSION: "2.3.3",
-              PROJVERSION: "4.9.3",
-              allow_failure: "false",
-            }
-          - {
-              python: 3.6,
-              GDALVERSION: "2.4.4",
-              PROJVERSION: "4.9.3",
-              allow_failure: "false",
-            }
-          - {
-              python: 3.6,
               GDALVERSION: "3.0.4",
               PROJVERSION: "6.2.1",
               allow_failure: "false",
             }
           - {
               python: 3.6,
-              GDALVERSION: "3.1.0",
+              GDALVERSION: "3.1.4",
               PROJVERSION: "6.3.2",
               allow_failure: "false",
             }
+          - {
+              python: 3.6,
+              GDALVERSION: "3.2.3",
+              PROJVERSION: "8.2.0",
+              allow_failure: "false",
+            }
+          - {
+              python: 3.6,
+              GDALVERSION: "3.3.3",
+              PROJVERSION: "8.2.0",
+              allow_failure: "false",
+            }
+
 
           # Test all supported python versions with latest stable gdal release
           - {
-              python: 3.6,
-              GDALVERSION: "3.2.1",
-              PROJVERSION: "7.2.1",
+              python: "3.6",
+              GDALVERSION: "3.4.0",
+              PROJVERSION: "8.2.1",
               allow_failure: "false",
             }
           - {
-              python: 3.7,
-              GDALVERSION: "3.2.1",
-              PROJVERSION: "7.2.1",
+              python: "3.7",
+              GDALVERSION: "3.4.0",
+              PROJVERSION: "8.2.1",
               allow_failure: "false",
             }
           - {
-              python: 3.8,
-              GDALVERSION: "3.2.1",
-              PROJVERSION: "7.2.1",
+              python: "3.8",
+              GDALVERSION: "3.4.0",
+              PROJVERSION: "8.2.1",
               allow_failure: "false",
             }
           - {
-              python: 3.9,
-              GDALVERSION: "3.2.1",
-              PROJVERSION: "7.2.1",
+              python: "3.9",
+              GDALVERSION: "3.4.0",
+              PROJVERSION: "8.2.1",
+              allow_failure: "false",
+            }
+          - {
+              python: "3.10",
+              GDALVERSION: "3.4.0",
+              PROJVERSION: "8.2.1",
+              allow_failure: "false",
+            }
+          - {
+              python: "3.10",
+              GDALVERSION: "3.3.3",
+              PROJVERSION: "8.2.1",
               allow_failure: "false",
             }
 
           # Test GDAL master
           - {
-              python: 3.6,
+              python: "3.10",
               GDALVERSION: "master",
-              PROJVERSION: "7.2.1",
+              PROJVERSION: "8.2.1",
               allow_failure: "true",
             }
 
@@ -134,6 +129,7 @@ jobs:
 
       - name: Install apt packages
         run: |
+          sudo apt-get update
           sudo apt-get install libatlas-base-dev libcurl4-openssl-dev libgeos-dev libfreexl-dev libzstd-dev libspatialite-dev
 
           # Unlike travis, packages from non default repositories are installed.
