@@ -1,4 +1,8 @@
-from six import text_type
+"""Fiona schema module."""
+
+from typing import List
+
+from typing import List
 
 from fiona.errors import SchemaError
 from fiona.rfc3339 import FionaDateType, FionaDateTimeType, FionaTimeType
@@ -24,7 +28,7 @@ FIELD_TYPES = [
     'float',        # OFTReal, Double Precision floating point
     None,           # OFTRealList, List of doubles
     'str',          # OFTString, String of UTF-8 chars
-    None,           # OFTStringList, Array of strings
+    'List[str]',    # OFTStringList, Array of strings
     None,           # OFTWideString, deprecated
     None,           # OFTWideStringList, deprecated
     'bytes',        # OFTBinary, Raw Binary data
@@ -39,13 +43,14 @@ FIELD_TYPES = [
 FIELD_TYPES_MAP = {
     'int32': int,
     'float': float,
-    'str': text_type,
+    'str': str,
     'date': FionaDateType,
     'time': FionaTimeType,
     'datetime': FionaDateTimeType,
     'bytes': bytes,
     'int64': int,
-    'int': int
+    'int': int,
+    'List[str]': List[str],
 }
 
 FIELD_TYPES_MAP_REV = dict([(v, k) for k, v in FIELD_TYPES_MAP.items()])
