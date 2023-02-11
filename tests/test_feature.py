@@ -10,12 +10,11 @@ import pytest
 import fiona
 from fiona import collection
 from fiona.collection import Collection
-from fiona.errors import FionaDeprecationWarning
 from fiona.model import Feature
 from fiona.ogrext import featureRT
 
 
-class TestPointRoundTrip(object):
+class TestPointRoundTrip:
     def setup(self):
         self.tempdir = tempfile.mkdtemp()
         schema = {"geometry": "Point", "properties": {"title": "str"}}
@@ -36,10 +35,9 @@ class TestPointRoundTrip(object):
             "geometry": {"type": "Point", "coordinates": (0.0, 0.0)},
             "properties": {"title": "foo"},
         }
-        with pytest.warns(FionaDeprecationWarning):
-            g = featureRT(f, self.c)
-            assert g.geometry.type == "Point"
-            assert g.geometry.coordinates == (0.0, 0.0)
+        g = featureRT(f, self.c)
+        assert g.geometry.type == "Point"
+        assert g.geometry.coordinates == (0.0, 0.0)
 
     def test_properties(self):
         f = Feature.from_dict(
@@ -64,7 +62,7 @@ class TestPointRoundTrip(object):
         assert g.properties["title"] is None
 
 
-class TestLineStringRoundTrip(object):
+class TestLineStringRoundTrip:
     def setup(self):
         self.tempdir = tempfile.mkdtemp()
         schema = {"geometry": "LineString", "properties": {"title": "str"}}
@@ -103,7 +101,7 @@ class TestLineStringRoundTrip(object):
         assert g.properties["title"] == "foo"
 
 
-class TestPolygonRoundTrip(object):
+class TestPolygonRoundTrip:
     def setup(self):
         self.tempdir = tempfile.mkdtemp()
         schema = {"geometry": "Polygon", "properties": {"title": "str"}}

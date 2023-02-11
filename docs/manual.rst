@@ -6,9 +6,10 @@ The Fiona User Manual
 :Version: |release|
 :Date: |today|
 :Copyright:
-  This work, with the exception of code examples, is licensed under a `Creative Commons Attribution 3.0
-  United States License`__. The code examples are licensed under the BSD 3-clause license (see
-  LICENSE.txt in the repository root).
+  This work, with the exception of code examples, is licensed under a `Creative
+  Commons Attribution 3.0 United States License`__. The code examples are
+  licensed under the BSD 3-clause license (see LICENSE.txt in the repository
+  root).
 
 .. __: https://creativecommons.org/licenses/by/3.0/us/
 
@@ -89,12 +90,13 @@ In what cases would you not benefit from using Fiona?
 Example
 -------
 
-The first example of using Fiona is this: copying records from one file to
-another, adding two attributes and making sure that all polygons are facing
-"up". Orientation of polygons is significant in some applications, extruded
-polygons in Google Earth for one. No other library (like :py:mod:`Shapely`) is
-needed here, which keeps it uncomplicated. There's a :file:`test_uk` file in
-the Fiona repository for use in this and other examples.
+The first example of using Fiona is this: copying features (another word for
+record) from one file to another, adding two attributes and making sure that
+all polygons are facing "up". Orientation of polygons is significant in some
+applications, extruded polygons in Google Earth for one. No other library (like
+:py:mod:`Shapely`) is needed here, which keeps it uncomplicated. There's a
+:file:`test_uk` file in the Fiona repository for use in this and other
+examples.
 
 .. code-block:: python
 
@@ -134,11 +136,8 @@ the Fiona repository for use in this and other examples.
           driver=source.driver,
           schema=sink_schema,
       ) as sink:
-
           for f in source:
-
               try:
-
                   # If any feature's polygon is facing "down" (has rings
                   # wound clockwise), its rings will be reordered to flip
                   # it "up".
@@ -146,6 +145,7 @@ the Fiona repository for use in this and other examples.
                   assert g["type"] == "Polygon"
                   rings = g["coordinates"]
                   sa = sum(signed_area(r) for r in rings)
+
                   if sa < 0.0:
                       rings = [r[::-1] for r in rings]
                       g["coordinates"] = rings
@@ -450,10 +450,14 @@ be found in a dictionary named :py:attr:`fiona.FIELD_TYPES_MAP`.
 .. code-block:: pycon
 
   >>> pprint.pprint(fiona.FIELD_TYPES_MAP)
-  {'date': <class 'fiona.rfc3339.FionaDateType'>,
+  {'List[str]': typing.List[str],
+   'bytes': <class 'bytes'>,
+   'date': <class 'fiona.rfc3339.FionaDateType'>,
    'datetime': <class 'fiona.rfc3339.FionaDateTimeType'>,
    'float': <class 'float'>,
    'int': <class 'int'>,
+   'int32': <class 'int'>,
+   'int64': <class 'int'>,
    'str': <class 'str'>,
    'time': <class 'fiona.rfc3339.FionaTimeType'>}
 
@@ -828,6 +832,11 @@ iterator) of records.
    You may also call :py:meth:`flush` periodically to write the buffer contents
    to disk.
 
+.. admonition:: Format requirements
+
+   Format drivers may have specific requirements about what they store. For
+   example, the Shapefile driver may "fix" topologically invalid features.
+
 Creating files of the same structure
 ------------------------------------
 
@@ -1131,7 +1140,7 @@ Driver configuration options
 ----------------------------
 
 Drivers can have dataset open, dataset creation, respectively layer creation options. These options can be found
-on the drivers page on `GDAL's homepage. <https://gdal.org/drivers/vector/index.html>`_ or using the 
+on the drivers page on `GDAL's homepage. <https://gdal.org/drivers/vector/index.html>`_ or using the
 ``fiona.meta`` module:
 
 .. code-block:: pycon
@@ -1396,10 +1405,10 @@ Unsupported drivers
 Fiona maintains a list of OGR drivers in :py:attr:`fiona.supported_drivers`
 that are tested and known to work together with Fiona. Opening a dataset using
 an unsupported driver or access mode results in an :py:attr: `DriverError`
-exception. By passing `allow_unsupported_drivers=True` to :py:attr:`fiona.open` 
+exception. By passing `allow_unsupported_drivers=True` to :py:attr:`fiona.open`
 no compatibility checks are performed and unsupported OGR drivers can be used.
-However, there are no guarantees that Fiona will be able to access or write 
-data correctly using an unsupported driver.  
+However, there are no guarantees that Fiona will be able to access or write
+data correctly using an unsupported driver.
 
 .. code-block:: python
 
@@ -1408,7 +1417,7 @@ data correctly using an unsupported driver.
   with fiona.open("file.kmz", allow_unsupported_drivers=True) as collection:
     ...
 
-Not all OGR drivers are necessarily enabled in every GDAL distribution. The 
+Not all OGR drivers are necessarily enabled in every GDAL distribution. The
 following code snippet lists the drivers included in the GDAL installation
 used by Fiona:
 

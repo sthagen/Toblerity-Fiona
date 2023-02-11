@@ -168,7 +168,7 @@ class Object(MutableMapping):
         return dict(**self) == dict(**other)
 
 
-class _Geometry(object):
+class _Geometry:
     def __init__(self, coordinates=None, type=None, geometries=None):
         self.coordinates = coordinates
         self.type = type
@@ -191,20 +191,29 @@ class Geometry(Object):
         self._delegate = _Geometry(
             coordinates=coordinates, type=type, geometries=geometries
         )
-        super(Geometry, self).__init__(**data)
+        super().__init__(**data)
 
     @classmethod
-    def from_dict(cls, mapping=None, **kwargs):
-        data = dict(mapping or {}, **kwargs)
-        return Geometry(
-            coordinates=data.pop("coordinates", None),
-            type=data.pop("type", None),
-            geometries=[
-                Geometry.from_dict(**part)
-                for part in data.pop("geometries", None) or []
-            ],
-            **data
-        )
+    def from_dict(cls, ob=None, **kwargs):
+        data = dict(getattr(ob, "__geo_interface__", ob) or {}, **kwargs)
+
+        if "geometries" in data and data["type"] == "GeometryCollection":
+            _ = data.pop("coordinates", None)
+            _ = data.pop("type", None)
+            return Geometry(
+                type="GeometryCollection",
+                geometries=[
+                    Geometry.from_dict(**part) for part in data.pop("geometries")
+                ],
+                **data
+            )
+        else:
+            _ = data.pop("geometries", None)
+            return Geometry(
+                type=data.pop("type", None),
+                coordinates=data.pop("coordinates", []),
+                **data
+            )
 
     @property
     def coordinates(self):
@@ -239,8 +248,12 @@ class Geometry(Object):
         """
         return self._delegate.geometries
 
+    @property
+    def __geo_interface__(self):
+        return ObjectEncoder().default(self)
 
-class _Feature(object):
+
+class _Feature:
     def __init__(self, geometry=None, id=None, properties=None):
         self.geometry = geometry
         self.id = id
@@ -263,11 +276,11 @@ class Feature(Object):
         if properties is None:
             properties = Properties()
         self._delegate = _Feature(geometry=geometry, id=id, properties=properties)
-        super(Feature, self).__init__(**data)
+        super().__init__(**data)
 
     @classmethod
-    def from_dict(cls, mapping=None, **kwargs):
-        data = dict(mapping or {}, **kwargs)
+    def from_dict(cls, ob=None, **kwargs):
+        data = dict(getattr(ob, "__geo_interface__", ob) or {}, **kwargs)
         geom_data = data.pop("geometry", None)
 
         if isinstance(geom_data, Geometry):
@@ -309,7 +322,7 @@ class Feature(Object):
 
         Returns
         ------
-        obejct
+        object
 
         """
         return self._delegate.id
@@ -320,7 +333,7 @@ class Feature(Object):
 
         Returns
         -------
-        Object
+        object
 
         """
         return self._delegate.properties
@@ -336,12 +349,16 @@ class Feature(Object):
         """
         return "Feature"
 
+    @property
+    def __geo_interface__(self):
+        return ObjectEncoder().default(self)
+
 
 class Properties(Object):
     """A GeoJSON-like feature's properties"""
 
     def __init__(self, **kwds):
-        super(Properties, self).__init__(**kwds)
+        super().__init__(**kwds)
 
     @classmethod
     def from_dict(cls, mapping=None, **kwargs):
@@ -380,12 +397,17 @@ def decode_object(obj):
     Feature, Geometry, or dict
 
     """
-    if (obj.get("type", None) == "Feature") or "geometry" in obj:
-        return Feature.from_dict(**obj)
-    elif obj.get("type", None) in list(GEOMETRY_TYPES.values())[:8]:
-        return Geometry.from_dict(**obj)
-    else:
+    if isinstance(obj, Object):
         return obj
+    else:
+        obj = obj.get("__geo_interface__", obj)
+
+        if (obj.get("type", None) == "Feature") or "geometry" in obj:
+            return Feature.from_dict(**obj)
+        elif obj.get("type", None) in list(GEOMETRY_TYPES.values())[:8]:
+            return Geometry.from_dict(**obj)
+        else:
+            return obj
 
 
 def to_dict(val):
@@ -396,18 +418,3 @@ def to_dict(val):
         return val
     else:
         return obj
-
-
-def _guard_model_object(obj):
-    """Convert dict to Geometry or Feature.
-
-    For use during the 1.9-2.0 transition. Will be removed in 2.0.
-
-    """
-    if not isinstance(obj, Object):
-        warn(
-            "Support for feature and geometry dicts is deprecated. Instances of Feature and Geometry will be required in 2.0.",
-            FionaDeprecationWarning,
-            stacklevel=2,
-        )
-    return decode_object(obj)
